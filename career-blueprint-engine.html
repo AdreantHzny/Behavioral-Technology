@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Blueprint Engine - Bimbingan & Konseling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Library untuk fitur Unduh (PDF, JPG, PNG) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .step-content { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(15px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        /* Kustomisasi scrollbar elegan */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Efek fokus premium pada textarea */
+        textarea:focus {
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 sm:p-6 text-slate-800">
+
+    <div class="w-full max-w-3xl bg-white rounded-3xl shadow-xl shadow-indigo-100/50 border border-slate-100 overflow-hidden transition-all">
+        <!-- Header Premium dengan Gradien -->
+        <div class="bg-gradient-to-r from-indigo-600 to-blue-500 py-10 px-8 text-center relative overflow-hidden">
+            <div class="absolute inset-0 bg-white/10 opacity-20 transform -skew-y-12 scale-150"></div>
+            <h1 class="text-3xl font-extrabold text-white mb-2 relative z-10 tracking-tight">Career Blueprint Engine</h1>
+            <p class="text-indigo-100 text-sm font-medium relative z-10">Asesmen Karir Cerdas Berbasis AI</p>
+        </div>
+
+        <div class="p-8 sm:p-10">
+            <!-- Progress Bar -->
+            <div class="mb-10">
+                <div class="flex justify-between mb-3">
+                    <span class="text-xs font-bold tracking-wider text-indigo-600 uppercase">Langkah <span id="stepIndicator">1</span> dari 5</span>
+                    <span class="text-xs font-bold tracking-wider text-slate-400 uppercase" id="stepTitle">Identitas Diri</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-2.5 shadow-inner">
+                    <div id="progressBar" class="bg-gradient-to-r from-indigo-500 to-blue-500 h-2.5 rounded-full transition-all duration-500 ease-out" style="width: 20%"></div>
+                </div>
+            </div>
+
+            <form id="asesmenForm">
+                
+                <!-- Halaman 1: Identitas -->
+                <div id="step1" class="step-content">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-6 tracking-tight">Mulai dengan Identitas Anda</h2>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Nama Lengkap</label>
+                            <input type="text" id="nama" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white outline-none transition-all duration-200" placeholder="Masukkan nama lengkap Anda">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Kelas</label>
+                            <select id="kelas" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white outline-none transition-all duration-200 text-slate-700 cursor-pointer">
+                                <option value="">Pilih Kelas Anda...</option>
+                                <!-- Auto-generated via JS -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Halaman 2: Eksplorasi Minat Intrinsik -->
+                <div id="step2" class="step-content hidden">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2 tracking-tight">Eksplorasi Minat Intrinsik</h2>
+                    <p class="text-sm text-slate-500 mb-6 leading-relaxed">Kami ingin mengetahui apa yang benar-benar memotivasi Anda dari dalam.</p>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-3 leading-relaxed">1. Bayangkan kamu diberi akses internet super cepat tanpa batas, waktu luang seharian penuh, dan tidak ada satupun PR atau ujian dari sekolah. Hal apa yang akan kamu tonton, pelajari, atau buat secara terus-menerus sampai lupa waktu?</label>
+                        <textarea id="q1" rows="5" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white outline-none transition-all duration-200 resize-none text-slate-700" placeholder="Ceritakan sedetail mungkin..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Halaman 3: Pemetaan Kendala -->
+                <div id="step3" class="step-content hidden">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2 tracking-tight">Pemetaan Kendala Belajar</h2>
+                    <p class="text-sm text-slate-500 mb-6 leading-relaxed">Jujur pada diri sendiri adalah langkah pertama menuju solusi.</p>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-3 leading-relaxed">2. Setiap orang pasti punya “musuh” saat belajar atau mencoba hal baru. Saat kamu merasa sangat malas, stuck, atau ingin menyerah, apa yang biasanya menjadi penyebab utamanya? (Misalnya: Apakah karena takut gagal, tidak suka dihakimi, materinya terlalu bertele-tele, atau lingkungan rumah yang tidak mendukung?)</label>
+                        <textarea id="q2" rows="5" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white outline-none transition-all duration-200 resize-none text-slate-700" placeholder="Ceritakan kendala terbesarmu..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Halaman 4: Realitas Sosio-Ekonomi -->
+                <div id="step4" class="step-content hidden">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2 tracking-tight">Realitas Sosio-Ekonomi & Privilege</h2>
+                    <p class="text-sm text-slate-500 mb-6 leading-relaxed">Rencana karir yang hebat harus berpijak pada realitas.</p>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-3 leading-relaxed">3. Mari bicara jujur dan realistis tentang dukungan di sekitarmu. Melihat kondisi finansial keluarga dan harapan orang tua saat ini, di posisi mana kamu berada? (Misalnya: “Saya ditopang penuh untuk kuliah di mana saja”, “Saya harus cari beasiswa karena dana terbatas”, atau “Saya dituntut harus langsung bekerja untuk membantu keluarga”).</label>
+                        <textarea id="q3" rows="5" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white outline-none transition-all duration-200 resize-none text-slate-700" placeholder="Ceritakan kondisi dan rencana dukunganmu..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Halaman 5: Visi 1-3 Tahun -->
+                <div id="step5" class="step-content hidden">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2 tracking-tight">Visi 1-3 Tahun & Manajemen Risiko</h2>
+                    <p class="text-sm text-slate-500 mb-6 leading-relaxed">Mari petakan langkah taktis dan rencana cadanganmu.</p>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-3 leading-relaxed">4. Fokus ke 1 hingga 3 tahun ke depan. Agar kamu tidak menyesal saat nanti lulus, apa satu keahlian konkret atau target yang benar-benar ingin kamu capai mulai hari ini? Dan jika rencana utamamu ini gagal total, apa rencana cadangan (Plan B) yang akan kamu lakukan?</label>
+                        <textarea id="q4" rows="5" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white outline-none transition-all duration-200 resize-none text-slate-700" placeholder="Tuliskan target utamamu dan Plan B..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Navigasi Tombol dengan Micro-interactions -->
+                <div class="flex justify-between items-center mt-10 pt-6 border-t border-slate-100">
+                    <button type="button" id="btnPrev" class="hidden px-6 py-3 bg-white border border-slate-200 rounded-xl text-slate-600 font-semibold hover:bg-slate-50 hover:text-slate-800 active:scale-95 transition-all duration-200 shadow-sm">
+                        Kembali
+                    </button>
+                    <div class="flex-grow"></div>
+                    <button type="button" id="btnNext" class="px-8 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 active:scale-95 transition-all duration-200 shadow-lg shadow-indigo-200">
+                        Selanjutnya
+                    </button>
+                    <button type="submit" id="btnSubmit" class="hidden px-8 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-xl hover:from-emerald-600 hover:to-teal-600 active:scale-95 transition-all duration-200 shadow-lg shadow-emerald-200 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        Analisis Karir AI
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Loading & Hasil -->
+    <div id="modalHasil" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 sm:p-6 z-50 transition-opacity">
+        
+        <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl flex flex-col overflow-hidden max-h-[90vh] ring-1 ring-slate-900/5">
+            
+            <!-- State Loading -->
+            <div id="loadingState" class="flex flex-col items-center justify-center p-12 h-full w-full my-auto">
+                <div class="relative w-20 h-20 mb-6">
+                    <div class="absolute inset-0 border-4 border-indigo-100 rounded-full"></div>
+                    <div class="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
+                </div>
+                <h3 class="text-2xl font-bold text-slate-800 tracking-tight">Menganalisis Pola Psikologis...</h3>
+                <p class="text-slate-500 mt-2 text-center max-w-sm">AI sedang memproses minat, kendala, dan memetakan cetak biru karir paling realistis untuk Anda.</p>
+            </div>
+
+            <!-- State Hasil (Flex Column Penuh) -->
+            <div id="resultState" class="hidden flex-col h-full w-full overflow-hidden bg-slate-50">
+                
+                <!-- Header Modal -->
+                <div class="bg-white border-b border-slate-100 p-5 flex justify-between items-center shrink-0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <h3 class="font-bold text-lg text-slate-800">Cetak Biru Selesai</h3>
+                    </div>
+                    <button id="btnCloseModal" class="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-full focus:outline-none transition-all active:scale-95">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                
+                <!-- Area Konten (Flex-1) -->
+                <div class="flex-1 overflow-y-auto min-h-0 p-4 sm:p-6 space-y-6">
+                    <!-- Capture Area (Hanya Laporan yang Di-download) -->
+                    <div id="captureArea" class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200 space-y-6 relative overflow-hidden">
+                        
+                        <!-- Watermark visual -->
+                        <div class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-indigo-50 rounded-full opacity-50"></div>
+
+                        <div class="border-b border-slate-100 pb-5 mb-5 relative z-10">
+                            <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Career Blueprint Report</h2>
+                            <p class="text-slate-500 text-sm mt-1.5 flex items-center gap-2">
+                                <span class="inline-flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg> <span id="docNama" class="font-semibold text-slate-700">-</span></span> 
+                                <span class="text-slate-300">|</span> 
+                                <span class="inline-flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg> <span id="docKelas" class="font-semibold text-slate-700">-</span></span>
+                            </p>
+                        </div>
+
+                        <div class="bg-gradient-to-br from-indigo-50 to-blue-50 p-6 rounded-xl border border-indigo-100/60 relative z-10">
+                            <p class="text-xs uppercase tracking-wider text-indigo-600 font-bold mb-1">Rekomendasi Karir Utama</p>
+                            <p id="resKarirUtama" class="text-3xl font-extrabold text-slate-800 tracking-tight mb-2">-</p>
+                            <div class="flex items-center gap-2 text-sm text-slate-600 bg-white/60 inline-block px-3 py-1.5 rounded-lg border border-indigo-100 mt-1">
+                                <span class="font-medium text-slate-500">Alternatif:</span> <span id="resKarirAlternatif" class="font-semibold text-indigo-700">-</span>
+                            </div>
+                        </div>
+
+                        <div class="relative z-10">
+                            <h4 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Analisis Realitas
+                            </h4>
+                            <p id="resAnalisis" class="text-slate-600 text-sm leading-relaxed text-justify bg-slate-50 p-4 rounded-xl border border-slate-100">-</p>
+                        </div>
+
+                        <div class="relative z-10">
+                            <h4 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Kategori Kendala Terdeteksi
+                            </h4>
+                            <span id="resKategori" class="inline-flex items-center px-3.5 py-1.5 bg-rose-50 text-rose-700 border border-rose-100 rounded-full text-xs font-bold shadow-sm">-</span>
+                        </div>
+
+                        <div class="relative z-10">
+                            <h4 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Langkah Konkret 1 Tahun Ke Depan
+                            </h4>
+                            <ul id="resLangkah" class="list-none space-y-2 mt-2">
+                                <!-- List populated by JS -->
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- BAGIAN BARU: Chatbox Eksplorasi Karir Siswa Interaktif -->
+                    <div id="chatSection" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-md shadow-indigo-200">
+                                    AI
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-sm">Konsultasi & Eksplorasi Karir</h4>
+                                    <p class="text-xs text-slate-400">Tanyakan apapun seputar rekomendasi karirmu</p>
+                                </div>
+                            </div>
+                            <span class="px-2.5 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full text-[10px] font-bold uppercase tracking-wider">Aktif</span>
+                        </div>
+
+                        <!-- Container Pesan Obrolan -->
+                        <div id="chatHistoryContainer" class="space-y-3 max-h-80 overflow-y-auto p-1 bg-slate-50/50 rounded-xl">
+                            <!-- Bubble percakapan akan dimuat oleh JS secara dinamis -->
+                        </div>
+
+                        <!-- Form Kirim Pesan Chat -->
+                        <form id="formChatSiswa" class="flex items-center gap-2 pt-2">
+                            <input type="text" id="inputChatSiswa" class="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all duration-200" placeholder="Ketik pertanyaan atau tanggapanmu..." autocomplete="off">
+                            <button type="submit" id="btnSendChat" class="px-5 py-3 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-semibold rounded-xl text-sm transition-all duration-200 shadow-md shadow-indigo-100 flex items-center gap-1.5 shrink-0">
+                                <span>Kirim</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Footer / Tombol Download (Shrink-0) -->
+                <div class="p-5 bg-white border-t border-slate-100 shrink-0 flex flex-wrap gap-3 justify-center z-10 relative shadow-[0_-4px_15px_-3px_rgba(0,0,0,0.03)]">
+                    <button onclick="downloadBlueprint('pdf')" class="px-6 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-sm font-semibold flex items-center gap-2 active:scale-95 transition-all shadow-md shadow-rose-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg> Simpan PDF
+                    </button>
+                    <button onclick="downloadBlueprint('jpg')" class="px-6 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-sm font-semibold flex items-center gap-2 active:scale-95 transition-all shadow-md shadow-indigo-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Simpan JPG
+                    </button>
+                    <button onclick="downloadBlueprint('png')" class="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-semibold flex items-center gap-2 active:scale-95 transition-all shadow-md shadow-emerald-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Simpan PNG
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variable Global Penyimpan State Cetak Biru & Riwayat Chat
+        let currentBlueprintData = null;
+        let chatHistory = [];
+
+        // Logika Generate Pilihan Kelas
+        const kelasSelect = document.getElementById('kelas');
+        const tingkatKelas = ['X', 'XI', 'XII'];
+        tingkatKelas.forEach(tingkat => {
+            for(let i = 1; i <= 12; i++) {
+                let opt = document.createElement('option');
+                opt.value = `${tingkat}-${i}`;
+                opt.textContent = `${tingkat}-${i}`;
+                kelasSelect.appendChild(opt);
+            }
+        });
+
+        // Logika Navigasi Step
+        let currentStep = 1;
+        const totalSteps = 5;
+        const titles = ["Identitas Diri", "Minat Intrinsik", "Kendala Belajar", "Realitas & Privilege", "Visi & Risiko"];
+
+        function updateUI() {
+            for (let i = 1; i <= totalSteps; i++) {
+                document.getElementById(`step${i}`).classList.add('hidden');
+            }
+            document.getElementById(`step${currentStep}`).classList.remove('hidden');
+            document.getElementById('stepIndicator').innerText = currentStep;
+            document.getElementById('stepTitle').innerText = titles[currentStep - 1];
+            document.getElementById('progressBar').style.width = `${(currentStep / totalSteps) * 100}%`;
+            
+            document.getElementById('btnPrev').classList.toggle('hidden', currentStep === 1);
+            if (currentStep === totalSteps) {
+                document.getElementById('btnNext').classList.add('hidden');
+                document.getElementById('btnSubmit').classList.remove('hidden');
+            } else {
+                document.getElementById('btnNext').classList.remove('hidden');
+                document.getElementById('btnSubmit').classList.add('hidden');
+            }
+        }
+
+        function validateStep() {
+            if (currentStep === 1) return document.getElementById('nama').value.trim() && document.getElementById('kelas').value;
+            if (currentStep === 2) return document.getElementById('q1').value.trim();
+            if (currentStep === 3) return document.getElementById('q2').value.trim();
+            if (currentStep === 4) return document.getElementById('q3').value.trim();
+            if (currentStep === 5) return document.getElementById('q4').value.trim();
+            return true;
+        }
+
+        document.getElementById('btnNext').addEventListener('click', () => {
+            if (!validateStep()) return alert("Mohon isi jawaban secara jujur dan lengkap sebelum melanjutkan.");
+            if (currentStep < totalSteps) { currentStep++; updateUI(); }
+        });
+
+        document.getElementById('btnPrev').addEventListener('click', () => {
+            if (currentStep > 1) { currentStep--; updateUI(); }
+        });
+
+        // Submit Form ke Backend AI
+        document.getElementById('asesmenForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!validateStep()) return alert("Mohon lengkapi pertanyaan terakhir.");
+
+            const payload = {
+                identitas: { nama: document.getElementById('nama').value, kelas: document.getElementById('kelas').value },
+                kuesioner: [
+                    { pertanyaan: "Waktu luang & minat", jawaban: document.getElementById('q1').value },
+                    { pertanyaan: "Hambatan belajar", jawaban: document.getElementById('q2').value },
+                    { pertanyaan: "Kondisi finansial & privilege", jawaban: document.getElementById('q3').value },
+                    { pertanyaan: "Visi dan profil risiko", jawaban: document.getElementById('q4').value }
+                ]
+            };
+
+            // Transisi ke Modal Loading
+            document.getElementById('modalHasil').classList.remove('hidden');
+            document.getElementById('modalHasil').classList.add('flex');
+            
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('loadingState').classList.add('flex');
+            
+            document.getElementById('resultState').classList.remove('flex');
+            document.getElementById('resultState').classList.add('hidden');
+
+            try {
+                const response = await fetch('/generate-blueprint', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+
+                if(data.status === 'success') {
+                    const res = data.data;
+                    currentBlueprintData = res; // Simpan data cetak biru secara global
+                    
+                    document.getElementById('docNama').textContent = payload.identitas.nama;
+                    document.getElementById('docKelas').textContent = payload.identitas.kelas;
+                    document.getElementById('resKarirUtama').textContent = res.rekomendasi_karir_utama;
+                    document.getElementById('resKarirAlternatif').textContent = res.rekomendasi_karir_alternatif;
+                    document.getElementById('resAnalisis').textContent = res.analisis_realitas;
+                    document.getElementById('resKategori').textContent = res.kategori_masalah;
+                    
+                    const ul = document.getElementById('resLangkah');
+                    ul.innerHTML = '';
+                    res.langkah_konkret_1_tahun_kedepan.forEach(langkah => {
+                        let li = document.createElement('li');
+                        li.className = "flex items-start gap-3 text-sm text-slate-700 bg-white p-3 rounded-xl border border-slate-100 shadow-sm";
+                        li.innerHTML = `<span class="mt-0.5 text-indigo-500 flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg></span> <span>${langkah}</span>`;
+                        ul.appendChild(li);
+                    });
+
+                    // Inisialisasi Obrolan AI Pertama Kali
+                    initChatSection(payload.identitas.nama, res.rekomendasi_karir_utama);
+
+                    // Transisi ke State Hasil
+                    document.getElementById('loadingState').classList.remove('flex');
+                    document.getElementById('loadingState').classList.add('hidden');
+                    
+                    document.getElementById('resultState').classList.remove('hidden');
+                    document.getElementById('resultState').classList.add('flex');
+                    
+                    document.getElementById('asesmenForm').reset();
+                    currentStep = 1; updateUI();
+                } else {
+                    alert('Gagal menghasilkan blueprint: ' + data.message);
+                    closeModal();
+                }
+            } catch (error) {
+                alert('Pastikan server backend Python (Flask) sudah berjalan. Terjadi kesalahan jaringan.');
+                closeModal();
+            }
+        });
+
+        function closeModal() {
+            document.getElementById('modalHasil').classList.remove('flex');
+            document.getElementById('modalHasil').classList.add('hidden');
+        }
+
+        document.getElementById('btnCloseModal').addEventListener('click', closeModal);
+
+        // ==========================================
+        // LOGIKA CHATBOX EKSPLORASI SISWA
+        // ==========================================
+        function initChatSection(nama, karir) {
+            chatHistory = [];
+            const container = document.getElementById('chatHistoryContainer');
+            container.innerHTML = '';
+            
+            const salamAwal = `Halo ${nama}! Hasil analisis cetak birumu menunjukkan potensi besar di bidang **${karir}**. Ada hal yang ingin kamu tanyakan atau diskusikan mengenai langkah awal belajar atau prospek karir ini?`;
+            
+            // Tambahkan salam pembuka ke riwayat
+            chatHistory.push({ role: 'assistant', content: salamAwal });
+            renderChatMessage('assistant', salamAwal);
+        }
+
+        function renderChatMessage(role, text) {
+            const container = document.getElementById('chatHistoryContainer');
+            const wrapper = document.createElement('div');
+            wrapper.className = role === 'user' ? 'flex justify-end' : 'flex justify-start';
+
+            const bubble = document.createElement('div');
+            if (role === 'user') {
+                bubble.className = 'bg-indigo-600 text-white rounded-2xl rounded-tr-none max-w-[85%] px-4 py-2.5 text-sm shadow-sm';
+            } else {
+                bubble.className = 'bg-white text-slate-700 rounded-2xl rounded-tl-none max-w-[85%] px-4 py-2.5 text-sm border border-slate-200 shadow-sm leading-relaxed';
+            }
+            
+            // Render sederhana dengan dukungan baris baru
+            bubble.innerHTML = text.replace(/\n/g, '<br>');
+            wrapper.appendChild(bubble);
+            container.appendChild(wrapper);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function renderTypingIndicator() {
+            const container = document.getElementById('chatHistoryContainer');
+            const wrapper = document.createElement('div');
+            wrapper.id = 'typingIndicator';
+            wrapper.className = 'flex justify-start';
+
+            wrapper.innerHTML = `
+                <div class="bg-white text-slate-400 rounded-2xl rounded-tl-none px-4 py-2 text-xs border border-slate-200 flex items-center gap-1 shadow-sm">
+                    <span class="animate-pulse">AI sedang mengetik</span>
+                    <span class="animate-bounce">.</span>
+                    <span class="animate-bounce [animation-delay:0.2s]">.</span>
+                    <span class="animate-bounce [animation-delay:0.4s]">.</span>
+                </div>
+            `;
+            container.appendChild(wrapper);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) indicator.remove();
+        }
+
+        document.getElementById('formChatSiswa').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const inputEl = document.getElementById('inputChatSiswa');
+            const userMsg = inputEl.value.trim();
+            if (!userMsg) return;
+
+            // Render pesan user di layar
+            renderChatMessage('user', userMsg);
+            chatHistory.push({ role: 'user', content: userMsg });
+            inputEl.value = '';
+
+            renderTypingIndicator();
+
+            try {
+                const response = await fetch('/api/eksplorasi-siswa', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chatHistory: chatHistory,
+                        blueprintData: currentBlueprintData
+                    })
+                });
+
+                const data = await response.json();
+                removeTypingIndicator();
+
+                if (data.status === 'success') {
+                    const aiReply = data.reply;
+                    chatHistory.push({ role: 'assistant', content: aiReply });
+                    renderChatMessage('assistant', aiReply);
+                } else {
+                    renderChatMessage('assistant', 'Maaf, terjadi masalah saat memproses tanggapan. Silakan coba lagi.');
+                }
+            } catch (error) {
+                removeTypingIndicator();
+                renderChatMessage('assistant', 'Terjadi kesalahan jaringan. Pastikan koneksi server Flask tetap terhubung.');
+            }
+        });
+
+        // Fitur Unduh Dokumen (Memastikan hanya #captureArea yang dirender ke file)
+        async function downloadBlueprint(format) {
+            const captureArea = document.getElementById('captureArea');
+            const namaSiswa = document.getElementById('docNama').textContent.replace(/\s+/g, '_');
+            const fileName = `Career_Blueprint_${namaSiswa}`;
+
+            const canvas = await html2canvas(captureArea, {
+                scale: 2.5,
+                useCORS: true,
+                backgroundColor: '#ffffff'
+            });
+
+            if (format === 'png' || format === 'jpg') {
+                const imgData = canvas.toDataURL(`image/${format}`, 1.0);
+                const link = document.createElement('a');
+                link.download = `${fileName}.${format}`;
+                link.href = imgData;
+                link.click();
+            } 
+            else if (format === 'pdf') {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgProps = pdf.getImageProperties(canvas.toDataURL('image/jpeg', 1.0));
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const margin = 10; 
+                const pdfHeight = (imgProps.height * (pdfWidth - (margin*2))) / imgProps.width;
+                
+                pdf.addImage(canvas.toDataURL('image/jpeg', 1.0), 'JPEG', margin, margin, pdfWidth - (margin*2), pdfHeight);
+                pdf.save(`${fileName}.pdf`);
+            }
+        }
+
+        // Inisialisasi awal UI
+        updateUI();
+    </script>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive Counselor AI - Problem Solver</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .chat-container::-webkit-scrollbar { width: 6px; }
+        .chat-container::-webkit-scrollbar-track { background: #f1f5f9; }
+        .chat-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .chat-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .typing-indicator span {
+            animation: blink 1.4s infinite both;
+            height: 6px; width: 6px; background-color: #64748b; border-radius: 50%; display: inline-block; margin: 0 1px;
+        }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes blink { 0% { opacity: 0.2; } 20% { opacity: 1; } 100% { opacity: 0.2; } }
+    </style>
+</head>
+<body class="bg-slate-100 h-screen flex overflow-hidden text-slate-800">
+
+    <!-- SIDEBAR: TRIASE & ANALISIS (Panel Kiri) -->
+    <div class="w-1/3 bg-white border-r border-slate-200 p-6 flex flex-col hidden md:flex">
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                <i class="fas fa-brain text-indigo-600"></i> AI Triase
+            </h1>
+            <p class="text-sm text-slate-500 mt-1">Sistem Pemantauan Status Kognitif Siswa</p>
+        </div>
+
+        <div class="flex-1 space-y-6 overflow-y-auto">
+            <!-- Indikator Level Keparahan -->
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Tingkat Keparahan (Severity)</h3>
+                <div id="severity-badge" class="inline-flex items-center gap-2 px-4 py-2 rounded-full font-bold text-sm bg-slate-200 text-slate-600">
+                    <i class="fas fa-minus-circle"></i> Menunggu Analisis...
+                </div>
+                <p id="severity-desc" class="text-xs text-slate-500 mt-2">Mulai chat untuk melihat hasil triase psikologis otomatis.</p>
+            </div>
+
+            <!-- Indikator Kategori -->
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Kategori Masalah</h3>
+                <div id="category-text" class="text-lg font-semibold text-slate-700">-</div>
+            </div>
+
+            <!-- Analisis Kognitif AI Terstruktur -->
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-3">
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Analisis Kognitif AI</h3>
+                
+                <div>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Pola Pikir Dominan</span>
+                    <p id="analisis-skema" class="font-medium text-slate-800 text-xs mt-0.5">-</p>
+                </div>
+                
+                <div>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Pemicu Utama</span>
+                    <p id="analisis-pemicu" class="text-slate-600 text-xs mt-0.5">-</p>
+                </div>
+
+                <div class="rounded-lg bg-amber-50 p-2.5 border border-amber-200">
+                    <span class="text-xs font-bold text-amber-800 uppercase tracking-wider">Catatan Coping & Volatilitas</span>
+                    <p id="analisis-coping" class="text-xs text-amber-900 mt-1">-</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-auto pt-4 border-t border-slate-100">
+            <button onclick="clearChat()" class="w-full py-2 px-4 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2">
+                <i class="fas fa-trash-alt"></i> Reset Sesi Konseling
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN CHAT AREA (Panel Kanan) -->
+    <div class="flex-1 flex flex-col bg-slate-50">
+        <!-- Header Mobile / Chat -->
+        <div class="h-16 bg-white border-b border-slate-200 flex items-center px-6 shadow-sm z-10">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+                    <i class="fas fa-robot text-lg"></i>
+                </div>
+                <div>
+                    <h2 class="font-bold text-slate-800">Adaptive Counselor AI</h2>
+                    <p class="text-xs text-green-500 flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500"></span> Online</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Area Pesan (Scrollable) -->
+        <div id="chat-box" class="flex-1 overflow-y-auto p-6 space-y-6 chat-container bg-slate-50/50">
+            <!-- Pesan Pembuka AI -->
+            <div class="flex gap-4">
+                <div class="w-8 h-8 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center text-indigo-600 mt-1">
+                    <i class="fas fa-robot text-sm"></i>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-none px-5 py-3 max-w-[80%] shadow-sm">
+                    <p class="text-slate-700 text-[15px] leading-relaxed">Halo! Aku di sini untuk mendengarkan. Ada yang lagi bikin kamu kepikiran, bingung, atau capek akhir-akhir ini? Cerita aja, pelan-pelan.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Indikator Mengetik (Sembunyi by default) -->
+        <div id="typing-indicator" class="hidden px-6 pb-4">
+            <div class="flex gap-4">
+                <div class="w-8 h-8 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center text-indigo-600">
+                    <i class="fas fa-robot text-sm"></i>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm typing-indicator flex items-center">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Area Input -->
+        <div class="p-6 bg-white border-t border-slate-200">
+            <form id="chat-form" class="flex gap-3">
+                <input 
+                    type="text" 
+                    id="user-input" 
+                    placeholder="Ketik pesanmu di sini..." 
+                    class="flex-1 bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 block w-full p-3.5 transition-all outline-none"
+                    autocomplete="off"
+                    required
+                >
+                <button type="submit" id="send-btn" class="text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-4 focus:outline-none focus:ring-indigo-300 font-medium rounded-xl text-sm px-6 py-3.5 text-center transition-all flex items-center justify-center">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // State Chat History
+        let chatHistory = [];
+
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const chatBox = document.getElementById('chat-box');
+        const typingIndicator = document.getElementById('typing-indicator');
+        const sendBtn = document.getElementById('send-btn');
+
+        // Elemen Panel Triase
+        const severityBadge = document.getElementById('severity-badge');
+        const severityDesc = document.getElementById('severity-desc');
+        const categoryText = document.getElementById('category-text');
+        
+        // Elemen Analisis Terstruktur Baru
+        const analisisSkema = document.getElementById('analisis-skema');
+        const analisisPemicu = document.getElementById('analisis-pemicu');
+        const analisisCoping = document.getElementById('analisis-coping');
+
+        // Fungsi Append Pesan ke UI
+        function appendMessage(role, content) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `flex gap-4 ${role === 'user' ? 'flex-row-reverse' : ''}`;
+            
+            const avatar = role === 'user' 
+                ? `<div class="w-8 h-8 rounded-full bg-slate-800 flex-shrink-0 flex items-center justify-center text-white mt-1"><i class="fas fa-user text-sm"></i></div>`
+                : `<div class="w-8 h-8 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center text-indigo-600 mt-1"><i class="fas fa-robot text-sm"></i></div>`;
+            
+            const bubbleStyle = role === 'user'
+                ? `bg-slate-800 text-white rounded-2xl rounded-tr-none px-5 py-3 shadow-md`
+                : `bg-white border border-slate-200 text-slate-700 rounded-2xl rounded-tl-none px-5 py-3 shadow-sm`;
+
+            const formattedContent = content.replace(/\n/g, '<br>');
+
+            msgDiv.innerHTML = `
+                ${avatar}
+                <div class="max-w-[80%] ${bubbleStyle}">
+                    <p class="text-[15px] leading-relaxed">${formattedContent}</p>
+                </div>
+            `;
+            
+            chatBox.appendChild(msgDiv);
+            scrollToBottom();
+        }
+
+        // Fungsi Scroll ke Bawah
+        function scrollToBottom() {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Fungsi Update UI Triase di Sidebar
+        function updateTriaseUI(data) {
+            categoryText.textContent = data.kategori || "-";
+
+            // Update Analisis Terstruktur
+            const kognitif = data.analisis_kognitif || {};
+            analisisSkema.textContent = kognitif.skema_pikir || "-";
+            analisisPemicu.textContent = kognitif.pemicu_utama || "-";
+            
+            const volatilitas = data.volatilitas_emosi || "Rendah";
+            const catatan = kognitif.catatan_coping || "-";
+            analisisCoping.textContent = `[Volatilitas: ${volatilitas}] ${catatan}`;
+
+            // Update Badge Level Keparahan
+            const level = String(data.level_keparahan); 
+            severityBadge.className = "inline-flex items-center gap-2 px-4 py-2 rounded-full font-bold text-sm text-white transition-all";
+            
+            if (level === "1") {
+                severityBadge.classList.add("bg-emerald-500");
+                severityBadge.innerHTML = `<i class="fas fa-leaf"></i> Level 1 (Ringan)`;
+                severityDesc.textContent = "Masalah sehari-hari. AI merespon dengan taktik praktis dan framework aksi.";
+            } else if (level === "2") {
+                severityBadge.classList.add("bg-amber-500");
+                severityBadge.innerHTML = `<i class="fas fa-balance-scale"></i> Level 2 (Menengah)`;
+                severityDesc.textContent = "Krisis kognitif/emosional. AI merespon dengan teknik CBT dan validasi empati.";
+            } else if (level === "3") {
+                severityBadge.classList.add("bg-rose-500", "animate-pulse");
+                severityBadge.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Level 3 (Krusial)`;
+                severityDesc.textContent = "Indikasi risiko tinggi. AI memprioritaskan mendengarkan dan merutekan ke Guru BK.";
+            } else {
+                severityBadge.classList.add("bg-slate-200", "text-slate-600");
+                severityBadge.innerHTML = `<i class="fas fa-minus-circle"></i> Tidak Terdeteksi`;
+                severityDesc.textContent = "Sistem gagal mendeteksi tingkat keparahan.";
+            }
+        }
+
+        // Event Listener Form Submit
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            appendMessage('user', message);
+            chatHistory.push({ role: 'user', content: message });
+            userInput.value = '';
+            userInput.disabled = true;
+            sendBtn.disabled = true;
+            
+            typingIndicator.classList.remove('hidden');
+            scrollToBottom();
+
+            try {
+                const response = await fetch('/api/problem-solver', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chatHistory: chatHistory })
+                });
+
+                const result = await response.json();
+                typingIndicator.classList.add('hidden');
+
+                if (result.status === 'success') {
+                    const aiData = result.data;
+                    updateTriaseUI(aiData);
+                    
+                    appendMessage('assistant', aiData.balasan_ai);
+                    chatHistory.push({ role: 'assistant', content: aiData.balasan_ai });
+                } else {
+                    appendMessage('assistant', 'Maaf, terjadi kesalahan pada server. Coba lagi ya.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                typingIndicator.classList.add('hidden');
+                appendMessage('assistant', 'Koneksi terputus. Pastikan server Flask (app.py) sedang berjalan.');
+            } finally {
+                userInput.disabled = false;
+                sendBtn.disabled = false;
+                userInput.focus();
+            }
+        });
+
+        // Fungsi Reset Chat
+        function clearChat() {
+            if(confirm("Anda yakin ingin mereset sesi konseling ini?")) {
+                chatHistory = [];
+                chatBox.innerHTML = `
+                    <div class="flex gap-4">
+                        <div class="w-8 h-8 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center text-indigo-600 mt-1">
+                            <i class="fas fa-robot text-sm"></i>
+                        </div>
+                        <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-none px-5 py-3 max-w-[80%] shadow-sm">
+                            <p class="text-slate-700 text-[15px] leading-relaxed">Sesi direset. Halo lagi! Ada hal baru yang mau kita diskusikan?</p>
+                        </div>
+                    </div>
+                `;
+                
+                // Reset UI Triase
+                categoryText.textContent = "-";
+                analisisSkema.textContent = "-";
+                analisisPemicu.textContent = "-";
+                analisisCoping.textContent = "-";
+                severityBadge.className = "inline-flex items-center gap-2 px-4 py-2 rounded-full font-bold text-sm bg-slate-200 text-slate-600";
+                severityBadge.innerHTML = `<i class="fas fa-minus-circle"></i> Menunggu Analisis...`;
+                severityDesc.textContent = "Mulai chat untuk melihat hasil triase psikologis otomatis.";
+            }
+        }
+    </script>
+</body>
+</html>

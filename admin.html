@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dasbor Konselor AI - SMA Negeri 1 Padalarang</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Menggunakan Chart.js untuk Grafik Interaktif & Persentase -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; scroll-behavior: smooth; }
+        
+        /* Kustomisasi Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Scrollbar Khusus untuk Area Chat AI */
+        .chat-scrollbar::-webkit-scrollbar { width: 4px; }
+        .chat-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 4px; }
+        .chat-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.25); border-radius: 4px; }
+        .chat-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+
+        /* Style untuk Tab Aktif */
+        .tab-btn.active {
+            background-color: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+        }
+        
+        /* Animasi Kustom untuk Tabel */
+        @keyframes fadeInRow {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeInRow 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+        }
+
+        /* Animasi Toast Notification */
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(-10px); }
+            to { opacity: 0; transform: translateY(-20px); }
+        }
+        .toast-enter { animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .toast-exit { animation: fadeOut 0.3s ease-in forwards; }
+        
+        /* Sticky Table Header */
+        .sticky-header th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(4px);
+        }
+
+        /* Animasi Typing AI */
+        .typing-dot {
+            animation: typing 1.4s infinite ease-in-out both;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Mode Perbesar Panel Chat */
+        .chat-expanded {
+            position: fixed !important;
+            top: 2rem !important;
+            left: 2rem !important;
+            right: 2rem !important;
+            bottom: 2rem !important;
+            height: auto !important;
+            z-index: 100 !important;
+        }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Topbar Premium dengan Navigation Bar Terintegrasi -->
+    <header class="bg-gradient-to-r from-indigo-900 via-indigo-800 to-indigo-700 text-white shadow-lg sticky top-0 z-50">
+        
+        <!-- Navigation Bar Atas -->
+        <div class="px-6 py-2.5 border-b border-white/10 flex justify-between items-center text-xs font-medium bg-indigo-950/30">
+            <div class="flex gap-6 text-indigo-200">
+                <a href="index.html" class="hover:text-white transition-colors flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    Kembali ke Beranda
+                </a>
+                <a href="problem_solver_engine.html" class="hover:text-white transition-colors flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    AI Problem Solver
+                </a>
+            </div>
+            <div class="text-indigo-200 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                Mode Admin Aktif
+            </div>
+        </div>
+
+        <!-- Header Utama (Judul & Aksi) -->
+        <div class="py-4 px-6 flex justify-between items-center flex-wrap gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-white/10 p-2.5 rounded-xl backdrop-blur-md border border-white/20 transition-all duration-300 hover:scale-105 hover:bg-white/20 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">Ruang Konselor AI</h1>
+                    <p class="text-xs text-indigo-200 font-medium tracking-wide">Sistem Analisis Karir & Psikologi Siswa</p>
+                </div>
+            </div>
+            
+            <!-- Action Buttons Area -->
+            <div class="flex items-center gap-3 flex-wrap justify-end">
+                <button onclick="bukaPptModal()" aria-label="Buat PPT AI" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white text-sm font-semibold rounded-xl flex items-center gap-2 transition-all hover:shadow-[0_4px_12px_rgba(147,51,234,0.4)] hover:-translate-y-0.5 active:scale-95 shadow-md group">
+                    <svg class="w-4 h-4 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                    Buat PPT (AI)
+                </button>
+
+                <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleFileUpload(event)">
+                
+                <button onclick="document.getElementById('csvFileInput').click()" aria-label="Unggah Data CSV" class="px-5 py-2.5 bg-blue-500 hover:bg-blue-400 text-white text-sm font-semibold rounded-xl flex items-center gap-2 transition-all hover:shadow-[0_4px_12px_rgba(59,130,246,0.4)] hover:-translate-y-0.5 active:scale-95 shadow-md group">
+                    <svg class="w-4 h-4 transition-transform group-hover:-translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    Unggah Data (CSV)
+                </button>
+
+                <button onclick="downloadCSV()" aria-label="Unduh Data CSV" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold rounded-xl flex items-center gap-2 transition-all hover:shadow-[0_4px_12px_rgba(16,185,129,0.4)] hover:-translate-y-0.5 active:scale-95 shadow-md group">
+                    <svg class="w-4 h-4 transition-transform group-hover:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Unduh Data (CSV)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 p-6 max-w-7xl w-full mx-auto space-y-6">
+        
+        <!-- Baris Atas: RPL & Chart -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Panel Kiri: Asisten Konselor AI -->
+            <div id="chatPanel" class="bg-gradient-to-br from-indigo-500 via-purple-500 to-purple-600 rounded-2xl shadow-xl p-6 text-white flex flex-col justify-between relative overflow-hidden transition-all duration-300 border border-white/10 h-[400px]">
+                <!-- Decorative Elements -->
+                <div class="absolute top-0 right-0 w-40 h-40 bg-white opacity-5 rounded-full blur-2xl transform translate-x-10 -translate-y-10 pointer-events-none"></div>
+                <div class="absolute bottom-0 left-0 w-32 h-32 bg-indigo-900 opacity-20 rounded-full blur-xl transform -translate-x-10 translate-y-10 pointer-events-none"></div>
+                
+                <div class="relative z-10 flex flex-col h-full">
+                    <div class="flex justify-between items-start mb-1 shrink-0 w-full">
+                        <h2 class="text-xl font-bold flex items-center gap-2">
+                            <div class="p-1.5 bg-white/20 rounded-lg backdrop-blur-sm">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                            </div>
+                            Asisten Konselor AI
+                        </h2>
+                        <button onclick="toggleExpandChat()" title="Perbesar Layar Chat" class="p-1.5 bg-white/10 hover:bg-white/20 rounded-lg backdrop-blur-sm transition-colors border border-white/20">
+                            <svg id="expandIcon" class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                        </button>
+                    </div>
+                    
+                    <p class="text-indigo-100 text-xs mb-3 font-medium shrink-0">Pilih parameter di bawah, lalu AI akan merakitnya jadi RPL.</p>
+                    
+                    <!-- Chat Area -->
+                    <div id="chatArea" class="flex-1 bg-white/10 rounded-xl border border-white/20 p-3 mb-3 overflow-y-auto chat-scrollbar space-y-3 backdrop-blur-md shadow-inner flex flex-col relative">
+                        <!-- Konten akan di-generate oleh JS Wizard -->
+                    </div>
+
+                    <!-- Chat Input -->
+                    <div class="flex gap-2 mb-3 shrink-0 relative">
+                        <input type="text" id="chatInput" disabled placeholder="Silakan klik opsi di atas..." aria-label="Input pesan AI" class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-white placeholder-indigo-200 outline-none focus:ring-2 focus:ring-white/50 backdrop-blur-md text-sm transition-colors shadow-inner disabled:opacity-50">
+                        <button onclick="kirimPesan()" aria-label="Kirim Pesan" class="px-3 bg-white text-indigo-600 rounded-xl hover:bg-indigo-50 transition-colors shadow-md flex items-center justify-center active:scale-95">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                        </button>
+                    </div>
+
+                    <!-- Tombol Action Utama -->
+                    <button id="btnGenerateRPL" onclick="prosesGenerateRPL()" class="w-full py-2.5 bg-white/20 hover:bg-white/30 text-white rounded-xl font-bold text-xs transition-all border border-white/30 backdrop-blur-md flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-95 shrink-0 group">
+                        <span id="btnIcon"><svg class="w-4 h-4 transition-transform group-hover:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg></span>
+                        <span id="btnText">Rakit Obrolan Jadi RPL</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Panel Kanan: Grafik Persentase -->
+            <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col transition-all duration-300 hover:shadow-lg hover:-translate-y-1 h-[400px]">
+                <div class="flex justify-between items-start mb-4 shrink-0">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
+                            Peta Distribusi Masalah Siswa
+                        </h2>
+                        <p id="chartTitleStatus" class="text-sm text-slate-500 mt-1">Menampilkan persentase dari: <span class="font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md" id="lblStatusFilter">Semua Siswa</span> (<span id="lblTotalData" class="font-bold text-slate-700">0</span> data)</p>
+                    </div>
+                </div>
+                
+                <div class="flex-1 flex items-center justify-center relative w-full h-full pb-4">
+                    <canvas id="masalahChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Baris Tengah: Filter Navigasi Kelas (Hierarki) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 transition-all duration-300 hover:shadow-md">
+            <div class="flex flex-col md:flex-row gap-4 justify-between items-center">
+                
+                <!-- Filter Utama (Tingkat) -->
+                <div class="flex gap-2 p-1.5 bg-slate-100/80 rounded-xl w-full md:w-auto overflow-x-auto shadow-inner border border-slate-200/50" id="tingkatFilters" role="tablist">
+                    <button class="tab-btn active px-5 py-2.5 text-sm font-semibold rounded-lg text-slate-600 hover:text-slate-800 transition-all whitespace-nowrap" data-tingkat="ALL" role="tab" aria-selected="true">Semua Siswa</button>
+                    <button class="tab-btn px-5 py-2.5 text-sm font-semibold rounded-lg text-slate-600 hover:text-slate-800 transition-all whitespace-nowrap" data-tingkat="X" role="tab" aria-selected="false">Kelas X</button>
+                    <button class="tab-btn px-5 py-2.5 text-sm font-semibold rounded-lg text-slate-600 hover:text-slate-800 transition-all whitespace-nowrap" data-tingkat="XI" role="tab" aria-selected="false">Kelas XI</button>
+                    <button class="tab-btn px-5 py-2.5 text-sm font-semibold rounded-lg text-slate-600 hover:text-slate-800 transition-all whitespace-nowrap" data-tingkat="XII" role="tab" aria-selected="false">Kelas XII</button>
+                </div>
+
+                <!-- Filter Lanjutan (Sub-Kelas) -->
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <label for="subKelasFilter" class="text-sm font-semibold text-slate-500 whitespace-nowrap cursor-pointer">Sub-Kelas:</label>
+                    <select id="subKelasFilter" disabled aria-label="Filter Sub Kelas" class="w-full md:w-56 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 hover:border-indigo-400 transition-all disabled:opacity-50 disabled:bg-slate-50 disabled:cursor-not-allowed cursor-pointer shadow-sm">
+                        <option value="ALL">Semua Sub-Kelas</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Baris Bawah: Tabel Data Dinamis -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col transition-all duration-300 hover:shadow-lg">
+            <div class="p-5 border-b border-slate-200 flex flex-col sm:flex-row gap-4 justify-between items-center bg-white">
+                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+                    Basis Data Asesmen
+                </h2>
+                <!-- Input pencarian dengan tombol hapus -->
+                <div class="relative w-full sm:w-auto group flex items-center">
+                    <svg class="w-4 h-4 text-slate-400 absolute left-3.5 transition-colors group-focus-within:text-indigo-500 z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <input type="text" id="searchInput" aria-label="Cari nama siswa" placeholder="Cari nama siswa..." class="pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white w-full sm:w-72 transition-all duration-300 group-hover:border-indigo-300 shadow-sm relative">
+                    <button id="btnClearSearch" class="hidden absolute right-3 text-slate-400 hover:text-slate-700 transition-colors focus:outline-none z-10" aria-label="Hapus Pencarian" onclick="clearSearchInput()">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto max-h-[500px]">
+                <table class="w-full text-left border-collapse">
+                    <thead class="sticky-header">
+                        <tr class="border-b border-slate-200 shadow-sm">
+                            <th class="py-4 px-6 text-xs font-bold text-slate-500 tracking-wider uppercase bg-slate-50/90">Nama Lengkap</th>
+                            <th class="py-4 px-6 text-xs font-bold text-slate-500 tracking-wider uppercase bg-slate-50/90">Kelas</th>
+                            <th class="py-4 px-6 text-xs font-bold text-slate-500 tracking-wider uppercase bg-slate-50/90">Kategori Masalah</th>
+                            <th class="py-4 px-6 text-xs font-bold text-slate-500 tracking-wider uppercase bg-slate-50/90">Rekomendasi Karir AI</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-slate-100 bg-white">
+                        <!-- Data Baris di-render via JS -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- State Kosong jika tidak ada data -->
+            <div id="emptyState" class="hidden flex-col items-center justify-center p-16 text-center bg-slate-50/50">
+                <div class="bg-white p-5 rounded-full mb-4 shadow-sm border border-slate-100">
+                    <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                </div>
+                <p class="text-slate-700 font-bold text-lg">Tidak ada data ditemukan</p>
+                <p class="text-slate-500 text-sm mt-1 max-w-sm">Coba sesuaikan kata kunci pencarian atau ganti kombinasi filter kelas di atas.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Hasil RPL -->
+    <div id="rplModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-fade-in">
+            <!-- Header Modal -->
+            <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-indigo-50">
+                <h3 class="font-bold text-lg text-indigo-900 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    Hasil Rakitan RPL
+                </h3>
+                <button onclick="tutupRplModal()" class="text-slate-500 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <!-- Isi RPL -->
+            <div id="rplContent" class="p-6 overflow-y-auto whitespace-pre-wrap text-slate-700 text-sm leading-relaxed font-medium chat-scrollbar flex-1">
+                <!-- Hasil dari AI akan masuk ke sini -->
+            </div>
+            
+            <!-- Footer Modal -->
+            <div class="p-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3 flex-wrap">
+                <!-- Tombol Shortcut ke PPT -->
+                <button onclick="bukaPptModalDariRpl()" class="px-4 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 font-semibold text-sm transition-colors shadow-sm flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                    Jadikan PPT
+                </button>
+                <div class="flex-1"></div>
+                <button onclick="tutupRplModal()" class="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 font-semibold text-sm transition-colors shadow-sm">Tutup</button>
+                <button onclick="salinTeksRPL()" class="px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-semibold text-sm transition-colors shadow-sm flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                    Salin Teks
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Generate PPT -->
+    <div id="pptModal" class="hidden fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden animate-fade-in">
+            <!-- Header Modal PPT -->
+            <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-purple-50">
+                <h3 class="font-bold text-lg text-purple-900 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                    Generator PPT (AI)
+                </h3>
+                <button onclick="tutupPptModal()" class="text-slate-500 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <!-- Form Body PPT -->
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Topik Materi</label>
+                    <input type="text" id="pptTopik" placeholder="Contoh: Manajemen Waktu Belajar" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-500 transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Target Kelas</label>
+                    <input type="text" id="pptKelas" placeholder="Contoh: Kelas X" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-500 transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Desain Visual</label>
+                    <select id="pptTemplate" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-500 bg-white transition-all cursor-pointer">
+                        <option value="modern">Modern (Biru Keabuan)</option>
+                        <option value="kreatif">Kreatif (Krem & Oranye)</option>
+                        <option value="formal">Formal (Putih & Biru Dongker)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Footer Modal PPT -->
+            <div class="p-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
+                <button onclick="tutupPptModal()" class="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 font-semibold text-sm transition-colors shadow-sm">Batal</button>
+                <button id="btnProsesPpt" onclick="prosesGeneratePPT()" class="px-4 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 font-semibold text-sm transition-colors shadow-sm flex items-center gap-2">
+                    <span id="btnPptIcon"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></span>
+                    <span id="btnPptText">Buat Presentasi</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none"></div>
+
+    <script>
+        // State Global
+        let currentTingkat = "ALL";
+        let currentSubKelas = "ALL";
+        let searchQuery = "";
+        let databaseAsli = [];
+        let currentFilteredData = []; 
+        let chartInstance = null;
+        let chatHistory = []; 
+        let lastGeneratedTopik = ""; 
+        let rplConfig = { kategori: "", metode: "", sasaranTipe: "", sasaranDetail: "" };
+
+        // --- FUNGSI PERBESAR CHAT ---
+        function toggleExpandChat() {
+            const chatPanel = document.getElementById('chatPanel');
+            chatPanel.classList.toggle('chat-expanded');
+        }
+
+        // --- FUNGSI MODAL RPL ---
+        function tutupRplModal() {
+            document.getElementById('rplModal').classList.add('hidden');
+        }
+
+        function salinTeksRPL() {
+            const content = document.getElementById('rplContent').innerText;
+            navigator.clipboard.writeText(content).then(() => {
+                showToast("Berhasil Disalin", "Teks RPL telah disalin ke clipboard.", "success");
+            }).catch(err => {
+                showToast("Gagal Menyalin", "Gagal menyalin teks RPL.", "error");
+            });
+        }
+
+        // --- FUNGSI MODAL PPT & INTEGRASI BACKEND ---
+        function bukaPptModal(defaultTopik = '', defaultKelas = '') {
+            document.getElementById('pptModal').classList.remove('hidden');
+            if(defaultTopik) document.getElementById('pptTopik').value = defaultTopik;
+            if(defaultKelas) document.getElementById('pptKelas').value = defaultKelas;
+        }
+
+        function tutupPptModal() {
+            document.getElementById('pptModal').classList.add('hidden');
+        }
+
+        function bukaPptModalDariRpl() {
+            let saranTopik = lastGeneratedTopik || ("Materi Bimbingan " + (rplConfig.kategori || "Konseling"));
+            let saranKelas = rplConfig.sasaranDetail || "Kelas X";
+            bukaPptModal(saranTopik, saranKelas);
+        }
+
+        async function prosesGeneratePPT() {
+            const topik = document.getElementById('pptTopik').value.trim();
+            const kelas = document.getElementById('pptKelas').value.trim();
+            const template = document.getElementById('pptTemplate').value;
+
+            if (!topik) {
+                showToast("Validasi Gagal", "Topik materi presentasi wajib diisi.", "error");
+                document.getElementById('pptTopik').focus();
+                return;
+            }
+
+            const btn = document.getElementById('btnProsesPpt');
+            const iconWrap = document.getElementById('btnPptIcon');
+            const textWrap = document.getElementById('btnPptText');
+
+            btn.disabled = true;
+            iconWrap.innerHTML = `<svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
+            textWrap.innerText = "Menyusun Slide...";
+            
+            showToast("Memproses AI", "Sedang merancang slide presentasi, mohon tunggu...", "info");
+
+            try {
+                const response = await fetch('/generate-ppt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ topik: topik, target_kelas: kelas || "Umum", template_style: template })
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    let filenameFormat = topik.replace(/[^a-z0-9]/gi, '_').substring(0, 30);
+                    a.download = `Materi_BK_${filenameFormat}.pptx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    
+                    showToast("Berhasil", "File presentasi telah berhasil diunduh.", "success");
+                    tutupPptModal();
+                } else {
+                    const errData = await response.json();
+                    showToast("Gagal Merakit", errData.error || "Terjadi kesalahan pada server AI.", "error");
+                }
+            } catch (e) {
+                showToast("Koneksi Terputus", "Gagal menghubungi server untuk membuat PPT.", "error");
+            } finally {
+                btn.disabled = false;
+                iconWrap.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>`;
+                textWrap.innerText = "Buat Presentasi";
+            }
+        }
+
+        // --- SISTEM TOAST NOTIFICATION ---
+        function showToast(title, message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let icon = '';
+            let colorClass = '';
+            
+            if (type === 'success') {
+                icon = `<svg class="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+                colorClass = 'border-emerald-200 bg-white';
+            } else if (type === 'info') {
+                icon = `<svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+                colorClass = 'border-indigo-200 bg-white';
+            } else {
+                icon = `<svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+                colorClass = 'border-red-200 bg-white';
+            }
+
+            toast.className = `toast-enter pointer-events-auto flex items-start gap-3 p-4 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.1)] border ${colorClass} max-w-sm w-full`;
+            toast.innerHTML = `
+                <div class="flex-shrink-0 mt-0.5">${icon}</div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold text-slate-800">${title}</h4>
+                    <p class="text-xs text-slate-500 mt-1">${message}</p>
+                </div>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('toast-enter');
+                toast.classList.add('toast-exit');
+                setTimeout(() => {
+                    if (container.contains(toast)) container.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
+        // --- FUNGSI UNGGAH CSV (DIUPGRADE DENGAN LOKAL RENDER) ---
+        async function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.type !== "text/csv" && !file.name.endsWith('.csv')) {
+                showToast("Format Tidak Sesuai", "Harap unggah file dengan format .csv", "error");
+                event.target.value = ''; 
+                return;
+            }
+
+            showToast("Memproses...", "Sedang membaca file CSV Anda.", "info");
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const text = e.target.result;
+                    const rows = text.split('\n').filter(row => row.trim() !== '');
+                    
+                    if (rows.length < 2) {
+                        showToast("Data Kosong", "File CSV tidak memiliki data.", "error");
+                        return;
+                    }
+
+                    const headers = rows[0].split(',').map(h => h.trim().toLowerCase().replace(/"/g, ''));
+                    const namaIdx = headers.findIndex(h => h.includes('nama'));
+                    const kelasIdx = headers.findIndex(h => h.includes('kelas'));
+                    const masalahIdx = headers.findIndex(h => h.includes('masalah') || h.includes('kategori'));
+                    const karirIdx = headers.findIndex(h => h.includes('karir') || h.includes('rekomendasi'));
+
+                    if (namaIdx === -1 || kelasIdx === -1) {
+                        showToast("Format Salah", "CSV wajib memiliki kolom 'nama' dan 'kelas'.", "error");
+                        return;
+                    }
+
+                    const newData = [];
+                    for (let i = 1; i < rows.length; i++) {
+                        const cols = rows[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                        if (cols.length < 2) continue;
+
+                        let tingkat = "ALL", sub = "ALL";
+                        const kelasFull = cols[kelasIdx] ? cols[kelasIdx].replace(/"/g, '').trim() : '';
+                        
+                        if (kelasFull && kelasFull.includes('-')) {
+                            const parts = kelasFull.split('-');
+                            tingkat = parts[0];
+                            sub = parts[1];
+                        } else if (kelasFull) {
+                            tingkat = kelasFull;
+                        }
+
+                        newData.push({
+                            id: i,
+                            nama: cols[namaIdx] ? cols[namaIdx].replace(/"/g, '').trim() : '-',
+                            tingkat: tingkat,
+                            sub: sub,
+                            kelasFull: kelasFull,
+                            masalah: masalahIdx !== -1 && cols[masalahIdx] ? cols[masalahIdx].replace(/"/g, '').trim() : 'Pribadi',
+                            karir: karirIdx !== -1 && cols[karirIdx] ? cols[karirIdx].replace(/"/g, '').trim() : '-'
+                        });
+                    }
+
+                    databaseAsli = newData;
+                    refreshDashboard();
+                    showToast("Berhasil Menampilkan", "Data CSV berhasil dimuat ke dalam dasbor.", "success");
+
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    try {
+                        const response = await fetch('/api/upload-csv', { method: 'POST', body: formData });
+                        const resData = await response.json();
+                        if (resData.status !== 'success') console.warn("Server warning:", resData.message);
+                    } catch (serverErr) {
+                        console.log("Backend offline, data di-render secara lokal.");
+                    }
+                } catch (error) {
+                    console.error("Error parsing CSV:", error);
+                    showToast("Gagal Memproses", "Terjadi kesalahan saat mengurai file CSV.", "error");
+                } finally {
+                    event.target.value = ''; 
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // --- INTEGRASI API: AMBIL DATA SISWA & STATISTIK ---
+        async function loadDataDariServer() {
+            try {
+                const response = await fetch('/api/data-siswa');
+                const resData = await response.json();
+                
+                if (resData.status === 'success') {
+                    databaseAsli = resData.data.map(item => {
+                        let tingkat = "ALL", sub = "ALL";
+                        if (item.kelas && item.kelas.includes('-')) {
+                            const parts = item.kelas.split('-');
+                            tingkat = parts[0];
+                            sub = parts[1];
+                        }
+                        return {
+                            id: item.id,
+                            nama: item.nama,
+                            tingkat: tingkat,
+                            sub: sub,
+                            kelasFull: item.kelas,
+                            masalah: item.kategori_masalah,
+                            karir: item.rekomendasi_karir
+                        };
+                    });
+                    refreshDashboard();
+                }
+            } catch (error) {
+                console.log("Data server tidak tersedia, menunggu unggahan lokal.");
+            }
+        }
+
+        async function loadStatistikServer() {
+            try {
+                const response = await fetch('/api/statistik');
+                const resData = await response.json();
+                if (resData.status === 'success' && chartInstance) {
+                    const mapData = { 'Akademik': 0, 'Karir': 0, 'Pribadi': 0, 'Sosial': 0 };
+                    resData.labels.forEach((label, i) => { 
+                        if (mapData[label] !== undefined) mapData[label] = resData.data[i]; 
+                    });
+                    chartInstance.data.datasets[0].data = [mapData['Akademik'], mapData['Karir'], mapData['Pribadi'], mapData['Sosial']];
+                    chartInstance.update();
+                }
+            } catch (error) {
+                console.log("Statistik server tidak tersedia.");
+            }
+        }
+
+        function downloadCSV() {
+            window.location.href = '/export-csv';
+        }
+
+        // --- SISTEM CHAT WIZARD (GUIDED FLOW) ---
+        function appendAIResponse(teks) {
+            const chatArea = document.getElementById("chatArea");
+            const id = "msg-" + Date.now();
+            const html = `
+                <div id="${id}" class="flex items-start gap-2 text-sm w-full mb-3 animate-fade-in">
+                    <div class="w-6 h-6 rounded-full bg-indigo-900/50 flex items-center justify-center font-bold text-[10px] shrink-0 border border-white/20">AI</div>
+                    <div class="bg-white/20 rounded-xl rounded-tl-none p-3 text-white shadow-sm border border-white/10 max-w-[90%] leading-relaxed flex flex-col gap-2">
+                        <p>${teks}</p>
+                        <div class="opsi-container flex flex-wrap gap-2 mt-1 empty:hidden"></div>
+                    </div>
+                </div>
+            `;
+            chatArea.insertAdjacentHTML('beforeend', html);
+            chatArea.scrollTop = chatArea.scrollHeight;
+            return document.getElementById(id).querySelector('.opsi-container');
+        }
+
+        function appendUserResponse(teks) {
+            const chatArea = document.getElementById("chatArea");
+            const html = `
+                <div class="flex items-start gap-2 text-sm w-full justify-end mb-3 animate-fade-in">
+                    <div class="bg-indigo-600 rounded-xl rounded-tr-none p-2.5 text-white shadow-md max-w-[85%] leading-relaxed">
+                        ${teks}
+                    </div>
+                    <div class="w-6 h-6 rounded-full bg-white flex items-center justify-center font-bold text-indigo-700 text-[10px] shrink-0">U</div>
+                </div>
+            `;
+            chatArea.insertAdjacentHTML('beforeend', html);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        function mulaiSistemWizard() {
+            document.getElementById("chatArea").innerHTML = ''; 
+            rplConfig = { kategori: "", metode: "", sasaranTipe: "", sasaranDetail: "" };
+            
+            document.getElementById("chatInput").disabled = true;
+            document.getElementById("chatInput").placeholder = "Silakan klik opsi di atas...";
+
+            const container = appendAIResponse("Halo! Mari buat RPL. Silakan pilih <b>Kategori Masalah</b> yang akan ditangani:");
+            const opsi = ["Akademik", "Pribadi", "Sosial", "Karir"];
+            opsi.forEach(opt => {
+                const btn = document.createElement("button");
+                btn.className = "px-3 py-1.5 bg-white/10 hover:bg-white/30 border border-white/30 rounded-lg text-xs font-semibold transition-colors text-left";
+                btn.innerText = opt;
+                btn.onclick = () => {
+                    appendUserResponse(`Kategori: ${opt}`);
+                    rplConfig.kategori = opt;
+                    disableSemuaTombol();
+                    lanjutLangkah2();
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function lanjutLangkah2() {
+            setTimeout(() => {
+                const container = appendAIResponse(`Baik, kategori <b>${rplConfig.kategori}</b>. Selanjutnya, pilih <b>Metode Penanganan</b>:`);
+                const opsi = ["Bimbingan Klasikal", "Bimbingan Kelompok", "Konseling Kelompok", "Konseling Individu"];
+                opsi.forEach(opt => {
+                    const btn = document.createElement("button");
+                    btn.className = "px-3 py-1.5 bg-indigo-500 hover:bg-indigo-400 border border-indigo-300 rounded-lg text-xs font-semibold transition-colors";
+                    btn.innerText = opt;
+                    btn.onclick = () => {
+                        appendUserResponse(`Metode: ${opt}`);
+                        rplConfig.metode = opt;
+                        disableSemuaTombol();
+                        lanjutLangkah3();
+                    };
+                    container.appendChild(btn);
+                });
+            }, 500);
+        }
+
+        function lanjutLangkah3() {
+            setTimeout(() => {
+                const container = appendAIResponse("Pilih <b>Target Sasaran</b> untuk layanan ini:");
+                const opsi = [
+                    { label: "Semua Kelas & Sub Kelas", id: "semua" },
+                    { label: "Tingkat Kelas Tertentu (X/XI/XII)", id: "tingkat" },
+                    { label: "Sub-Kelas Spesifik (Cth: X-4)", id: "subkelas" }
+                ];
+                opsi.forEach(opt => {
+                    const btn = document.createElement("button");
+                    btn.className = "px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 border border-emerald-300 rounded-lg text-xs font-semibold transition-colors text-left w-full";
+                    btn.innerText = opt.label;
+                    btn.onclick = () => {
+                        appendUserResponse(`Sasaran: ${opt.label}`);
+                        rplConfig.sasaranTipe = opt.id;
+                        disableSemuaTombol();
+                        tanganiDetailSasaran();
+                    };
+                    container.appendChild(btn);
+                });
+            }, 500);
+        }
+
+        function tanganiDetailSasaran() {
+            setTimeout(() => {
+                if (rplConfig.sasaranTipe === "semua") {
+                    rplConfig.sasaranDetail = "Semua Siswa SMA Negeri 1 Padalarang";
+                    lanjutLangkah4();
+                } else if (rplConfig.sasaranTipe === "tingkat") {
+                    const container = appendAIResponse("Pilih Tingkat Kelas:");
+                    ["Kelas X", "Kelas XI", "Kelas XII"].forEach(opt => {
+                        const btn = document.createElement("button");
+                        btn.className = "px-3 py-1.5 bg-white/20 hover:bg-white/40 border border-white/40 rounded-lg text-xs font-semibold";
+                        btn.innerText = opt;
+                        btn.onclick = () => {
+                            appendUserResponse(opt);
+                            rplConfig.sasaranDetail = `Semua ${opt}`;
+                            disableSemuaTombol();
+                            lanjutLangkah4();
+                        };
+                        container.appendChild(btn);
+                    });
+                } else if (rplConfig.sasaranTipe === "subkelas") {
+                    const inputField = document.getElementById("chatInput");
+                    inputField.disabled = false;
+                    inputField.placeholder = "Ketik sub-kelas (contoh: X-4) lalu Enter...";
+                    inputField.focus();
+                    appendAIResponse("Silakan ketik nama kelas/sub-kelas spesifik di kotak input bawah (contoh: <b>X-4</b> atau <b>XI-IPA-2</b>) lalu tekan Enter.");
+                    inputField.onkeypress = function(event) {
+                        if (event.key === "Enter") {
+                            event.preventDefault();
+                            kirimPesan();
+                        }
+                    };
+                }
+            }, 500);
+        }
+
+        function kirimPesan() {
+            const inputField = document.getElementById("chatInput");
+            if (inputField.disabled) return;
+            const val = inputField.value.trim();
+            if(val) {
+                appendUserResponse(`Sub-kelas: ${val}`);
+                rplConfig.sasaranDetail = val;
+                inputField.value = "";
+                inputField.disabled = true;
+                inputField.placeholder = "Silakan klik opsi di atas...";
+                inputField.onkeypress = null; 
+                lanjutLangkah4();
+            }
+        }
+
+        function lanjutLangkah4() {
+            setTimeout(() => {
+                const ringkasan = `
+                    <b>Data RPL Siap!</b><br>
+                    • Kategori: ${rplConfig.kategori}<br>
+                    • Metode: ${rplConfig.metode}<br>
+                    • Sasaran: ${rplConfig.sasaranDetail}
+                    <br><br>
+                    Silakan klik tombol <b>"Rakit Obrolan Jadi RPL"</b> di bawah untuk men-generate dokumen.
+                `;
+                appendAIResponse(ringkasan);
+                chatHistory = [
+                    { role: "system", content: "Buatkan RPL Bimbingan Konseling berdasarkan parameter berikut." },
+                    { role: "user", content: `Tolong buatkan RPL dengan Kategori: ${rplConfig.kategori}, Metode: ${rplConfig.metode}, untuk Sasaran: ${rplConfig.sasaranDetail}.` }
+                ];
+            }, 500);
+        }
+
+        function disableSemuaTombol() {
+            const semuaTombol = document.getElementById("chatArea").querySelectorAll("button");
+            semuaTombol.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add("opacity-50", "cursor-not-allowed");
+            });
+        }
+
+        async function prosesGenerateRPL() {
+            if (chatHistory.length === 0) {
+                showToast("Obrolan Kosong", "Selesaikan pengisian parameter RPL terlebih dahulu.", "info");
+                return;
+            }
+            
+            const btn = document.getElementById('btnGenerateRPL');
+            const iconWrap = document.getElementById('btnIcon');
+            const textWrap = document.getElementById('btnText');
+            
+            btn.disabled = true;
+            iconWrap.innerHTML = `<svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
+            textWrap.innerText = "Merakit RPL...";
+            
+            showToast("AI Bekerja", "Sedang menyusun struktur dokumen RPL, harap tunggu...", "info");
+
+            try {
+                const response = await fetch('/generate-rpl', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        kategori: rplConfig.kategori,
+                        metode: rplConfig.metode,
+                        sasaran: rplConfig.sasaranDetail
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('rplContent').innerHTML = data.hasil || data.response;
+                    lastGeneratedTopik = rplConfig.kategori;
+                    document.getElementById('rplModal').classList.remove('hidden');
+                    showToast("Selesai", "RPL berhasil dirakit.", "success");
+                } else {
+                    throw new Error("Gagal merespon dari server");
+                }
+            } catch (error) {
+                // Fallback Mockup Jika Offline Server AI Tidak Terhubung
+                const mockupRPL = `RENCANA PELAKSANAAN LAYANAN (RPL) BIMBINGAN KONSELING
+===================================================
+
+1. Kategori Masalah : ${rplConfig.kategori}
+2. Metode Layanan   : ${rplConfig.metode}
+3. Sasaran Layanan  : ${rplConfig.sasaranDetail}
+
+A. TUJUAN LAYANAN
+Siswa dapat memahami dan mengatasi tantangan terkait masalah ${rplConfig.kategori} melalui pendekatan yang konstruktif dan sistematis.
+
+B. KEGIATAN LAYANAN
+1. Tahap Awal/Pendahuluan:
+   - Konselor membuka pertemuan dengan salam dan doa.
+   - Menyampaikan tujuan bimbingan hari ini.
+   
+2. Tahap Inti:
+   - Eksplorasi masalah dan curah pendapat (brainstorming).
+   - Pemberian materi/intervensi sesuai dengan pendekatan ${rplConfig.metode}.
+   - Diskusi interaktif dan tanya jawab bersama.
+
+3. Tahap Penutup:
+   - Evaluasi singkat terhadap pemahaman siswa.
+   - Refleksi dan kesimpulan.
+
+C. EVALUASI
+- Evaluasi Proses: Mengamati partisipasi aktif siswa selama layanan berlangsung.
+- Evaluasi Hasil: Pemahaman baru, perasaan positif, dan rencana tindakan dari siswa.
+
+(Catatan: Ini adalah hasil simulasi karena server AI saat ini sedang offline.)`;
+                document.getElementById('rplContent').innerText = mockupRPL;
+                lastGeneratedTopik = rplConfig.kategori;
+                document.getElementById('rplModal').classList.remove('hidden');
+                showToast("Mode Offline", "Menampilkan hasil simulasi RPL karena server tidak merespon.", "info");
+            } finally {
+                btn.disabled = false;
+                iconWrap.innerHTML = `<svg class="w-4 h-4 transition-transform group-hover:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>`;
+                textWrap.innerText = "Rakit Obrolan Jadi RPL";
+            }
+        }
+
+        // --- DASHBOARD: CHART & TABLE LOGIC ---
+        function initChart() {
+            const ctx = document.getElementById('masalahChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Akademik', 'Karir', 'Pribadi', 'Sosial'],
+                    datasets: [{
+                        data: [0, 0, 0, 0],
+                        backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 12 }, padding: 20 } }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        function populateSubKelas(tingkat) {
+            const select = document.getElementById('subKelasFilter');
+            select.innerHTML = '<option value="ALL">Semua Sub-Kelas</option>';
+            if (tingkat === "ALL") { select.disabled = true; return; }
+            
+            select.disabled = false;
+            const subs = [...new Set(databaseAsli.filter(i => i.tingkat === tingkat).map(i => i.sub))].filter(s => s !== "ALL" && s);
+            subs.sort().forEach(sub => {
+                select.insertAdjacentHTML('beforeend', `<option value="${sub}">${sub}</option>`);
+            });
+        }
+
+        function clearSearchInput() {
+            document.getElementById('searchInput').value = '';
+            searchQuery = '';
+            document.getElementById('btnClearSearch').classList.add('hidden');
+            refreshDashboard();
+        }
+
+        function refreshDashboard() {
+            currentFilteredData = databaseAsli.filter(item => {
+                const matchTingkat = currentTingkat === "ALL" || item.tingkat === currentTingkat;
+                const matchSub = currentSubKelas === "ALL" || item.sub === currentSubKelas;
+                const matchSearch = item.nama.toLowerCase().includes(searchQuery.toLowerCase());
+                return matchTingkat && matchSub && matchSearch;
+            });
+            
+            document.getElementById('lblTotalData').innerText = currentFilteredData.length;
+            
+            let statusText = "Semua Siswa";
+            if(currentTingkat !== "ALL") statusText = `Kelas ${currentTingkat}`;
+            if(currentSubKelas !== "ALL") statusText = `Kelas ${currentTingkat}-${currentSubKelas}`;
+            if(searchQuery) statusText += ` (Pencarian: ${searchQuery})`;
+            document.getElementById('lblStatusFilter').innerText = statusText;
+
+            // Render Table
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            if (currentFilteredData.length === 0) {
+                document.getElementById('emptyState').classList.remove('hidden');
+                document.getElementById('emptyState').classList.add('flex');
+            } else {
+                document.getElementById('emptyState').classList.add('hidden');
+                document.getElementById('emptyState').classList.remove('flex');
+                
+                currentFilteredData.forEach((item, index) => {
+                    let badgeColor = "bg-slate-100 text-slate-700";
+                    if(item.masalah.toLowerCase().includes("akademik")) badgeColor = "bg-blue-100 text-blue-700";
+                    else if(item.masalah.toLowerCase().includes("karir")) badgeColor = "bg-purple-100 text-purple-700";
+                    else if(item.masalah.toLowerCase().includes("pribadi")) badgeColor = "bg-emerald-100 text-emerald-700";
+                    else if(item.masalah.toLowerCase().includes("sosial")) badgeColor = "bg-amber-100 text-amber-700";
+
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 transition-colors border-b border-slate-100 animate-fade-in";
+                    tr.style.animationDelay = `${index * 0.05}s`;
+                    tr.innerHTML = `
+                        <td class="py-3 px-6 text-sm font-semibold text-slate-800">${item.nama}</td>
+                        <td class="py-3 px-6 text-sm text-slate-600">${item.kelasFull}</td>
+                        <td class="py-3 px-6 text-sm"><span class="px-2.5 py-1 rounded-full text-xs font-medium ${badgeColor}">${item.masalah}</span></td>
+                        <td class="py-3 px-6 text-sm text-slate-600 truncate max-w-xs" title="${item.karir}">${item.karir}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            // Update Chart
+            if (chartInstance) {
+                let counts = { 'Akademik': 0, 'Karir': 0, 'Pribadi': 0, 'Sosial': 0 };
+                currentFilteredData.forEach(item => {
+                    let m = item.masalah.charAt(0).toUpperCase() + item.masalah.slice(1).toLowerCase();
+                    if(counts[m] !== undefined) counts[m]++;
+                    else counts['Pribadi']++; // Default fallback
+                });
+                chartInstance.data.datasets[0].data = [counts['Akademik'], counts['Karir'], counts['Pribadi'], counts['Sosial']];
+                chartInstance.update();
+            }
+        }
+
+        // --- EVENT LISTENERS ---
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.tab-btn').forEach(b => { 
+                    b.classList.remove('active'); 
+                    b.classList.add('text-slate-600'); 
+                });
+                e.target.classList.add('active'); 
+                e.target.classList.remove('text-slate-600');
+                
+                currentTingkat = e.target.getAttribute('data-tingkat'); 
+                currentSubKelas = "ALL";
+                
+                populateSubKelas(currentTingkat); 
+                refreshDashboard();
+            });
+        });
+
+        document.getElementById('subKelasFilter').addEventListener('change', (e) => { 
+            currentSubKelas = e.target.value; 
+            refreshDashboard(); 
+        });
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            document.getElementById('btnClearSearch').classList.toggle('hidden', searchQuery.length === 0);
+            refreshDashboard();
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initChart(); 
+            loadDataDariServer(); 
+            loadStatistikServer(); 
+            mulaiSistemWizard(); 
+        });
+    </script>
+</body>
+</html>
