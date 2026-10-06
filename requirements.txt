@@ -3,3 +3,4 @@ openai
 python-pptx
 flask-cors
 python-dotenv
+pandas
