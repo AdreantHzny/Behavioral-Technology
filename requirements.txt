@@ -5,3 +5,4 @@ flask-cors
 python-dotenv
 pandas
 gunicorn
+Flask-Cors
