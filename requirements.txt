@@ -4,3 +4,4 @@ python-pptx
 flask-cors
 python-dotenv
 pandas
+gunicorn
